@@ -1,18 +1,17 @@
-import { Button, Typography } from '@mui/material';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { GetServerSidePropsContext } from 'next';
 import { FC } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import InputField from '../components/formControl/InputField';
-import StyledEmotionButton from '../components/StyledEmotionButton';
-import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import InputField from '../components/formControl/InputField';
+import Layout from '../components/Layout';
 
 type FormInputs = {
   username: string;
 };
 
 const schema = z.object({
-  username: z.string().trim().min(1),
+  username: z.string().trim().min(1).email(),
 });
 
 type Schema = z.infer<typeof schema>;
@@ -29,12 +28,12 @@ const SSRPage: FC = () => {
   };
   return (
     <>
-      <Typography variant="h4">Welcome to the server!</Typography>
-
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <InputField name="username" label="User Name" form={form} />
-        {/* <input type="submit" /> */}
-      </form>
+      <Layout title="Coupon specifications">
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <InputField name="Email" label="Email" form={form} />
+          {/* <input type="submit" /> */}
+        </form>
+      </Layout>
     </>
   );
 };

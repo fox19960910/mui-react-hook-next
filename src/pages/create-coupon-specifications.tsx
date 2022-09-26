@@ -6,13 +6,17 @@ import InputField from '../components/formControl/InputField';
 import StyledEmotionButton from '../components/StyledEmotionButton';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import Layout from '../components/Layout';
+import SelectDropdown from '../components/formControl/SelectDropdown';
 
 type FormInputs = {
-  username: string;
+  name: string;
+  issuance: string;
 };
 
 const schema = z.object({
-  username: z.string().trim().min(1),
+  name: z.string().trim().min(1).max(20),
+  issuance: z.string(),
 });
 
 type Schema = z.infer<typeof schema>;
@@ -20,7 +24,8 @@ type Schema = z.infer<typeof schema>;
 const SSRPage: FC = () => {
   const form = useForm<FormInputs, Schema>({
     defaultValues: {
-      username: '',
+      name: '',
+      issuance: '',
     },
     resolver: zodResolver(schema),
   });
@@ -29,12 +34,16 @@ const SSRPage: FC = () => {
   };
   return (
     <>
-      <Typography variant="h4">Welcome to the server!</Typography>
-
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <InputField name="username" label="User Name" form={form} />
-        {/* <input type="submit" /> */}
-      </form>
+      <Layout title="Create coupon specifications">
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <Typography variant="h6" gutterBottom>
+            Create new coupon details
+          </Typography>
+          <InputField name="name" label="Coupon name" form={form} />
+          <SelectDropdown name="issuance" label="Coupon issuance subject" form={form} data={['1', '2', '3']} />
+          <input type="submit" />
+        </form>
+      </Layout>
     </>
   );
 };
