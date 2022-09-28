@@ -5,12 +5,12 @@ import { Controller } from 'react-hook-form';
 type Props = {
   form: any;
   name: string;
-  label: string;
+  placeholder: string;
   disabled?: boolean;
 };
 
 const InputField = (props: Props) => {
-  const { form, name, label, disabled = false } = props;
+  const { form, name, placeholder, disabled = false } = props;
   const { errors } = form.formState;
   return (
     <Controller
@@ -19,12 +19,13 @@ const InputField = (props: Props) => {
       render={({ field }) => (
         <TextField
           {...field}
-          id="outlined-error"
+          id={`input-${name}`}
           name={name}
-          label={label}
           disabled={disabled}
           error={!!errors[name]}
           helperText={errors[name] && errors[name].message}
+          size="small"
+          placeholder={placeholder}
         />
       )}
     />

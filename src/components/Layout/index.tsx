@@ -175,7 +175,7 @@ export default function Layout({ children, title }: Props) {
             </ListItem>
           ))}
         </List>
-        <Divider />
+        {/* <Divider /> */}
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />

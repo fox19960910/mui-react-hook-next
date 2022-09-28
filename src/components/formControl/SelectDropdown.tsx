@@ -5,13 +5,12 @@ import { Controller } from 'react-hook-form';
 type Props = {
   form: any;
   name: string;
-  label: string;
   disabled?: boolean;
   data: string[];
 };
 
 const SelectDropdown = (props: Props) => {
-  const { form, name, label, disabled = false, data = [] } = props;
+  const { form, name, disabled = false, data = [] } = props;
   const { errors } = form.formState;
   return (
     <Controller
@@ -19,8 +18,17 @@ const SelectDropdown = (props: Props) => {
       control={form.control}
       render={({ field }) => (
         <FormControl fullWidth>
-          <InputLabel id="demo-simple-select-label">{label}</InputLabel>
-          <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Age" disabled={disabled} {...field}>
+          {/* <InputLabel id="demo-simple-select-label">{label}</InputLabel> */}
+          <Select
+            disabled={disabled}
+            {...field}
+            size="small"
+            displayEmpty
+            inputProps={{ 'aria-label': 'Without label' }}
+          >
+            <MenuItem value="">
+              <em>Please choose</em>
+            </MenuItem>
             {!!data &&
               data.length > 0 &&
               data.map((item, index) => (
