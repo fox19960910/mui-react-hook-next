@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box } from '@mui/material';
+import { Box, InputAdornment } from '@mui/material';
 import { GetServerSidePropsContext } from 'next';
 import { FC } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import * as z from 'zod';
 import CheckboxField from '../components/formControl/CheckboxField';
 import FormControl from '../components/formControl/FormControl';
@@ -14,29 +14,121 @@ import SwitchField from '../components/formControl/SwitchField';
 import Layout from '../components/Layout';
 import HeadSubTitle from '../components/Typography/HeadSubTitle';
 import HeadTitle from '../components/Typography/HeadTitle';
+import Button from '@mui/material/Button';
+import CouponIssuanceSubject from '../components/CreateCouponSpecifications/CouponIssuanceSubject';
+import LimitNumberUse from '../components/CreateCouponSpecifications/LimitNumberUse';
+import MaximumUse from '../components/CreateCouponSpecifications/MaximumUse';
 
 const fieldWidth = 210;
-type FormInputs = {
-  name: string;
-  issuance: string;
-};
+
+const subjectAll = [
+  { value: 'subjectAll', label: 'All' },
+  { value: 'subjectFranchise', label: 'Franchise (brand)' },
+  { value: 'subjectCategory', label: 'Category' },
+  { value: 'subjectRestaurant', label: 'Restaurant' },
+  { value: 'subjectYomart', label: 'Yomart' },
+];
+const oderType = [
+  { value: 'express', label: 'Express (OD)' },
+  { value: 'delivery', label: 'Delivery (VD)' },
+  { value: 'packing', label: 'Packing' },
+  { value: 'preOder', label: 'Pre-order' },
+];
+
+// export type TBenefitSelect = {
+//   typeBenefit: string;
+//   benefitValue: number;
+//   maxDiscount: number;
+// };
+// export type TCPIssuanceSubject = {
+//   issuanceParent: string;
+//   issuanceChild: string;
+//   issuancePercent: number;
+// };
+// export type TLimitUse = {
+//   isLimitUserActive: boolean;
+//   limitUseValue: number;
+// };
+// export type TMaximumUse = {
+//   isMaximumUse: boolean;
+//   maximumUseValue: number;
+// };
+// export type FormInputs = {
+//   name: string;
+//   issuance: TCPIssuanceSubject;
+//   couponBenefits: TBenefitSelect;
+//   paymentAcount: number;
+//   limitUse: TLimitUse;
+//   maximumUse: TMaximumUse;
+//   subjectsApply: string;
+//   oderType: string;
+//   yogiPass : boolean
+// };
 
 const schema = z.object({
   name: z.string().trim().min(1).max(20),
-  issuance: z.string(),
+  issuance: z.object({
+    issuanceParent: z.string().trim().min(1),
+    issuanceChild: z.string().trim().min(1),
+    issuancePercent: z.number().positive(),
+  }),
+  paymentAcount: z.number().positive(),
+  couponBenefits: z.object({
+    typeBenefit: z.string().trim().min(1),
+    benefitValue: z.number().positive(),
+    maxDiscount: z.number().positive(),
+  }),
+  limitUse: z.object({
+    isLimitUserActive: z.boolean(),
+    limitUseValue: z.number().positive(),
+  }),
+  maximumUse: z.object({
+    isMaximumUse: z.boolean(),
+    maximumUseValue: z.number().positive(),
+  }),
+  subjectsApply: z.string(),
+  oderType: z.string(),
+  yogiPass: z.boolean(),
+  useChanel: z.boolean(),
+  useCityRegion: z.boolean(),
+  // useDay: z.array(z.string()),
 });
 
-type Schema = z.infer<typeof schema>;
+export type Schema = z.infer<typeof schema>;
 
 const SSRPage: FC = () => {
-  const form = useForm<FormInputs, Schema>({
+  const form = useForm<Schema>({
     defaultValues: {
       name: '',
-      issuance: '',
+      issuance: {
+        issuanceParent: '',
+        issuanceChild: '',
+        issuancePercent: 0,
+      },
+      couponBenefits: {
+        typeBenefit: '',
+        benefitValue: 0,
+        maxDiscount: 0,
+      },
+      paymentAcount: 0,
+      limitUse: {
+        isLimitUserActive: false,
+        limitUseValue: 0,
+      },
+      maximumUse: {
+        isMaximumUse: false,
+        maximumUseValue: 0,
+      },
+      subjectsApply: '',
+      oderType: '',
+      yogiPass: false,
+      useChanel: false,
+      useCityRegion: false,
     },
     resolver: zodResolver(schema),
   });
-  const handleSubmit: SubmitHandler<Schema> = (values: FormInputs) => {
+
+  const handleSubmit: SubmitHandler<Schema> = (values: Schema) => {
     console.log('values', values);
   };
   return (
@@ -50,11 +142,7 @@ const SSRPage: FC = () => {
               <InputField name="name" placeholder="Please enter" form={form} />
             </FormControl>
             <FormControl id="issuance" label="Coupon issuance subject">
-              <SwrapSelectIssuance>
-                <SelectDropdown name="issuance1" form={form} data={['1', '2', '3']} />
-                <SelectDropdown name="issuance2" form={form} data={['1', '2', '3']} />
-                <InputField name="issuance-value" placeholder="0 %" form={form} />
-              </SwrapSelectIssuance>
+              <CouponIssuanceSubject form={form} />
             </FormControl>
           </Box>
 
@@ -66,45 +154,47 @@ const SSRPage: FC = () => {
 "
             >
               <SwrapSelectIssuance>
-                <SelectDropdown name="benefitSelect" form={form} data={['1', '2', '3']} />
-                <InputField name="benefitValue" placeholder="0 %" form={form} />
-                <InputField name="maxDiscount" placeholder="Maximum discount" form={form} />
+                <SelectDropdown name="couponBenefits.typeBenefit" form={form} data={['1', '2', '3']} />
+                <InputField name="couponBenefits.benefitValue" placeholder="0 %" form={form} type="number" />
+                <InputField
+                  name="couponBenefits.maxDiscount"
+                  placeholder="Maximum discount"
+                  form={form}
+                  type="number"
+                />
               </SwrapSelectIssuance>
             </FormControl>
             <FormControl id="paymentAcount" label="Minimum payment amount">
-              <InputField name="name" placeholder="Please enter" form={form} />
+              <InputField
+                name="paymentAcount"
+                placeholder="Please enter"
+                form={form}
+                type="number"
+                inputProps={{ endAdornment: <InputAdornment position="end">won</InputAdornment> }}
+              />
             </FormControl>
             <FormControl id="limitUse" label="Limit number of uses">
-              <SwitchField label="Per memberId" form={form} name="isLimitUserActive" />
-              <InputField name="limitUse" placeholder="Can be used " form={form} />
+              <LimitNumberUse form={form} />
             </FormControl>
             <FormControl id="maximumUse" label="Maximum number of uses">
-              <SwitchField label="Max Person" form={form} name="isMaximumUse" />
-              <InputField name="maximumUse" placeholder="Can be used " form={form} />
+              <MaximumUse form={form} />
             </FormControl>
           </Box>
 
           <Box>
             <HeadSubTitle>Subjects to apply coupons</HeadSubTitle>
-            <FormControl id="subjects" label="Subjects to apply coupons">
-              <RadioField name="subjectAll" label="All" form={form} />
-              <RadioField name="subjectFranchise" label="Franchise (brand)" form={form} />
-              <RadioField name="subjectCategory" label="Category" form={form} />
-              <RadioField name="subjectRestaurant" label="Restaurant" form={form} />
-              <RadioField name="subjectYomart" label="Yomart" form={form} />
+            <FormControl id="subjectsApply" label="Subjects to apply coupons">
+              <RadioField name="subjectsApply" label="subjectsApply" form={form} data={subjectAll} />
             </FormControl>
           </Box>
 
           <Box>
             <HeadSubTitle>Conditions for using coupons</HeadSubTitle>
             <FormControl id="oderType" label="Order type">
-              <RadioField name="express" label="Express (OD)" form={form} />
-              <RadioField name="delivery" label="Delivery (VD)" form={form} />
-              <RadioField name="packing" label="Packing" form={form} />
-              <RadioField name="preOder" label="Pre-order" form={form} />
+              <RadioField name="oderType" label="Order type" form={form} data={oderType} />
             </FormControl>
-            <FormControl id="yogipass" label="Yogi Pass">
-              <CheckboxField name="yogipass" label="Available for copy during Yogi Pass" form={form} />
+            <FormControl id="yogiPass" label="Yogi Pass">
+              <CheckboxField name="yogiPass" label="Available for copy during Yogi Pass" form={form} />
             </FormControl>
             <FormControl id="useChanel" label="Use channel">
               <SwitchField label="" form={form} name="useChanel" />
@@ -130,7 +220,12 @@ const SSRPage: FC = () => {
             </FormControl>
           </Box>
 
-          <Box></Box>
+          <SWrapButton>
+            <Button variant="contained" type="submit">
+              Save
+            </Button>
+            <Button variant="outlined">Cancel</Button>
+          </SWrapButton>
         </form>
       </Layout>
     </>

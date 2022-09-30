@@ -15,14 +15,14 @@ const SwitchField = (props: Props) => {
       name={name}
       control={form.control}
       render={({ field }) => (
-        <FormControlLabel
-          control={<Switch defaultChecked />}
-          label={label}
-          {...field}
-          id={`input-${name}`}
-          name={name}
-          disabled={disabled}
-        />
+        <Switch {...field} checked={field.value} />
+        // <FormControlLabel
+        //   control={<Switch {...field} checked={field.value} name={name} />}
+        //   label={label}
+        //   id={`input-${name}`}
+        //   name={name}
+        //   disabled={disabled}
+        // />
       )}
     />
   );

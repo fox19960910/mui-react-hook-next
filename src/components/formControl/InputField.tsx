@@ -7,11 +7,17 @@ type Props = {
   name: string;
   placeholder: string;
   disabled?: boolean;
+  type?: string;
+  inputProps?: any;
 };
 
 const InputField = (props: Props) => {
-  const { form, name, placeholder, disabled = false } = props;
+  const { form, name, placeholder, disabled = false, type = 'text', inputProps } = props;
   const { errors } = form.formState;
+  const arrayName = name.split('.');
+  const errorFields = arrayName.length > 1 ? !!errors[arrayName[0]]?.[arrayName[1]] : !!errors[arrayName[0]];
+  const errorMessage =
+    arrayName.length > 1 ? errors[arrayName[0]]?.[arrayName[1]]?.message : errors[arrayName[0]]?.message;
   return (
     <Controller
       name={name}
@@ -19,13 +25,20 @@ const InputField = (props: Props) => {
       render={({ field }) => (
         <TextField
           {...field}
+          onChange={
+            type === 'number'
+              ? (event) => field.onChange(+event.target.value)
+              : (event) => field.onChange(event.target.value)
+          }
           id={`input-${name}`}
           name={name}
           disabled={disabled}
-          error={!!errors[name]}
-          helperText={errors[name] && errors[name].message}
+          error={errorFields}
+          helperText={errorMessage && errorMessage}
           size="small"
           placeholder={placeholder}
+          type={type}
+          InputProps={{ ...inputProps }}
         />
       )}
     />

@@ -1,48 +1,97 @@
-import { Button, Typography } from '@mui/material';
-import { GetServerSidePropsContext } from 'next';
-import { FC } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import InputField from '../components/formControl/InputField';
-import StyledEmotionButton from '../components/StyledEmotionButton';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Button, makeStyles, TextField } from '@mui/material';
 
-type FormInputs = {
-  username: string;
-};
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 
-const schema = z.object({
-  username: z.string().trim().min(1),
-});
-
-type Schema = z.infer<typeof schema>;
-
-const SSRPage: FC = () => {
-  const form = useForm<FormInputs, Schema>({
-    defaultValues: {
-      username: '',
-    },
-    resolver: zodResolver(schema),
-  });
-  const handleSubmit: SubmitHandler<Schema> = (values: FormInputs) => {
-    console.log('values', values);
+interface Inputs {
+  personalInfo: {
+    username: string;
+    email: string;
   };
+  password: string;
+}
+
+interface Props {
+  onModalClose: () => void;
+}
+
+function Form({ onModalClose }: Props): JSX.Element {
+  const { handleSubmit, control, formState } = useForm<Inputs>({
+    mode: 'onBlur',
+    defaultValues: {
+      personalInfo: {
+        username: '',
+        email: '',
+      },
+      password: '',
+    },
+  });
+
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    console.log('onSubmit', data);
+    return null;
+  };
+
   return (
     <>
-      <Typography variant="h4">Welcome to the server!</Typography>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Controller
+          name="personalInfo.username"
+          control={control}
+          render={({ field: { onChange, onBlur, value, ref } }) => (
+            <TextField
+              onBlur={onBlur}
+              onChange={onChange}
+              value={value}
+              type="text"
+              variant="filled"
+              placeholder="username"
+              ref={ref}
+            />
+          )}
+        />
 
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <InputField name="username" label="User Name" form={form} />
-        {/* <input type="submit" /> */}
+        <Controller
+          name="personalInfo.email"
+          control={control}
+          render={({ field: { onChange, onBlur, value, ref } }) => (
+            <TextField
+              onChange={onChange}
+              onBlur={onBlur}
+              value={value}
+              ref={ref}
+              type="email"
+              variant="filled"
+              placeholder="Email"
+            />
+          )}
+        />
+
+        <Controller
+          name="password"
+          control={control}
+          render={({ field: { onChange, onBlur, value, ref } }) => (
+            <TextField
+              type="password"
+              variant="filled"
+              placeholder="Password"
+              onChange={onChange}
+              onBlur={onBlur}
+              value={value}
+              ref={ref}
+            />
+          )}
+        />
+
+        <Button variant="contained" onClick={onModalClose}>
+          Cancel
+        </Button>
+        <Button variant="contained" type="submit" color="primary">
+          Submit
+        </Button>
       </form>
     </>
   );
-};
+}
 
-export const getServerSideProps = (ctx: GetServerSidePropsContext) => {
-  return {
-    props: {},
-  };
-};
-
-export default SSRPage;
+export default Form;

@@ -12,6 +12,10 @@ type Props = {
 const SelectDropdown = (props: Props) => {
   const { form, name, disabled = false, data = [] } = props;
   const { errors } = form.formState;
+  const arrayName = name.split('.');
+  const errorFields = arrayName.length > 1 ? !!errors[arrayName[0]]?.[arrayName[1]] : !!errors[arrayName[0]];
+  const errorMessage =
+    arrayName.length > 1 ? errors[arrayName[0]]?.[arrayName[1]]?.message : errors[arrayName[0]]?.message;
   return (
     <Controller
       name={name}
@@ -26,7 +30,7 @@ const SelectDropdown = (props: Props) => {
             displayEmpty
             inputProps={{ 'aria-label': 'Without label' }}
           >
-            <MenuItem value="">
+            <MenuItem disabled value="">
               <em>Please choose</em>
             </MenuItem>
             {!!data &&
