@@ -19,6 +19,9 @@ const LimitNumberUse = ({ form }: Props) => {
     defaultValue: false,
   });
 
+  useEffect(() => {
+    if (!isActive) form.setValue('limitUse.limitUseValue', 0);
+  }, [isActive, form]);
   return (
     <>
       <SwitchField label="Per memberId" form={form} name="limitUse.isLimitUserActive" />

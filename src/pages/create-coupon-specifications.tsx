@@ -34,11 +34,11 @@ import useFormData from '../hooks/useFormData';
 const fieldWidth = 210;
 
 const subjectAll = [
-  { value: 'subjectAll', label: 'All' },
-  { value: 'subjectFranchise', label: 'Franchise (brand)' },
-  { value: 'subjectCategory', label: 'Category' },
-  { value: 'subjectRestaurant', label: 'Restaurant' },
-  { value: 'subjectYomart', label: 'Yomart' },
+  { value: 'subjectAll', label: 'All', checked: true },
+  { value: 'subjectFranchise', label: 'Franchise (brand)', checked: false },
+  { value: 'subjectCategory', label: 'Category', checked: false },
+  { value: 'subjectRestaurant', label: 'Restaurant', checked: false },
+  { value: 'subjectYomart', label: 'Yomart', checked: false },
 ];
 const oderType = [
   { value: 'express', label: 'Express (OD)' },
@@ -82,7 +82,7 @@ export const schema = z.object({
   issuance: z.object({
     issuanceParent: z.string().trim().min(1),
     issuanceChild: z.string().trim().min(1),
-    issuancePercent: z.number().positive(),
+    issuancePercent: z.number().positive().lte(100),
   }),
   paymentAcount: z.number().positive(),
   couponBenefits: z.object({
@@ -94,10 +94,16 @@ export const schema = z.object({
     isLimitUserActive: z.boolean(),
     limitUseValue: z.number().positive(),
   }),
+  // .refine((val) => val.isLimitUserActive === true && val.limitUseValue > 0, {
+  //   message: 'Limit number of uses must be greater than 0',
+  // }),
   maximumUse: z.object({
     isMaximumUse: z.boolean(),
-    maximumUseValue: z.number().positive(),
+    maximumUseValue: z.number().positive().optional(),
   }),
+  // .refine((val) => val?.isMaximumUse === true && val.maximumUseValue && val.maximumUseValue < 0, {
+  //   message: 'Maximum number of uses must be greater than 0',
+  // }),
   subjectsApply: z.string(),
   oderType: z.string(),
   yogiPass: z.boolean(),
@@ -113,7 +119,7 @@ export const schema = z.object({
     sat: z.boolean(),
     sun: z.boolean(),
   }),
-  // useDate: z.string(),
+  useDate: z.string(),
   useTime: z.object({
     startTime: z.date().nullable(),
     endTime: z.date().nullable(),
@@ -149,8 +155,8 @@ const SSRPage: FC = () => {
       isMaximumUse: false,
       maximumUseValue: 0,
     },
-    subjectsApply: '',
-    oderType: '',
+    subjectsApply: 'subjectAll',
+    oderType: 'express',
     yogiPass: false,
     useChanel: false,
     useCityRegion: false,
@@ -193,25 +199,25 @@ const SSRPage: FC = () => {
       form.setValue('yogiPass', data.yogiPass);
     }
   }, [copy]);
+
   const handleSubmit: SubmitHandler<Schema> = (values: Schema) => {
-    console.log('values', values);
+    console.log('[ Result Submit] =', values);
     setData(values);
     form.reset();
   };
   const handleClickCopy = () => {
-    // const copyData = form.getValues();
-    // setData(copyData);
     form.reset();
     router.push({
       pathname: '/create-coupon-specifications',
       query: { copy: true },
     });
   };
-  console.log(form);
 
   useEffect(() => {
     return form.reset();
   }, []);
+
+  console.log(form.formState.errors);
   return (
     <>
       <Layout title="Create coupon specifications">
@@ -235,7 +241,7 @@ const SSRPage: FC = () => {
 "
             >
               <SwrapSelectIssuance>
-                <SelectDropdown name="couponBenefits.typeBenefit" form={form} data={['1', '2', '3']} />
+                <SelectDropdown name="couponBenefits.typeBenefit" form={form} data={['정율 ', '정액']} />
                 <InputField name="couponBenefits.benefitValue" placeholder="0 %" form={form} type="number" />
                 <InputField
                   name="couponBenefits.maxDiscount"

@@ -30,6 +30,7 @@ const InputField = (props: Props) => {
               ? (event) => field.onChange(+event.target.value)
               : (event) => field.onChange(event.target.value)
           }
+          value={type === 'number' ? Number(field.value) : field.value}
           id={`input-${name}`}
           name={name}
           disabled={disabled}

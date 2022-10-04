@@ -21,7 +21,7 @@ const RadioField = (props: Props) => {
       name={name}
       control={form.control}
       render={({ field }) => (
-        <SRadioGroup aria-label={label}>
+        <SRadioGroup aria-label={label} defaultValue={field.value}>
           {data.map((item, index) => (
             <FormControlLabel
               key={index}

@@ -53,11 +53,11 @@ const initialState: iDataState = {
       sat: false,
       sun: false,
     },
-    // useDate: '',
-    // useTime: {
-    //   startTime: null,
-    //   endTime: null,
-    // },
+    useDate: '',
+    useTime: {
+      startTime: null,
+      endTime: null,
+    },
   },
 };
 
