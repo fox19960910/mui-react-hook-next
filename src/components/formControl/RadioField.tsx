@@ -25,8 +25,7 @@ const RadioField = (props: Props) => {
           {data.map((item, index) => (
             <FormControlLabel
               key={index}
-              value={item.value}
-              control={<Radio disabled={disabled} />}
+              control={<Radio {...field} value={item.value} disabled={disabled} />}
               label={item.label}
             />
           ))}

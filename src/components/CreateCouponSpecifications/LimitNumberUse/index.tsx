@@ -19,7 +19,6 @@ const LimitNumberUse = ({ form }: Props) => {
     defaultValue: false,
   });
 
-  console.log('isActive', isActive);
   return (
     <>
       <SwitchField label="Per memberId" form={form} name="limitUse.isLimitUserActive" />

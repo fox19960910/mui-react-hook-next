@@ -1,4 +1,5 @@
 import { Checkbox, FormControlLabel, Radio } from '@mui/material';
+import { Key } from 'react';
 import { Controller } from 'react-hook-form';
 
 type Props = {
@@ -6,21 +7,20 @@ type Props = {
   name: string;
   label: string;
   disabled?: boolean;
+  key?: Key;
 };
 
 const CheckboxField = (props: Props) => {
-  const { form, name, label, disabled = false } = props;
+  const { form, name, label, disabled = false, key } = props;
   return (
     <Controller
       name={name}
       control={form.control}
       render={({ field }) => (
         <FormControlLabel
-          control={<Checkbox defaultChecked />}
+          key={key}
+          control={<Checkbox {...field} checked={field.value} />}
           label={label}
-          {...field}
-          id={`checkbox-${name}`}
-          name={name}
           disabled={disabled}
         />
       )}

@@ -1,23 +1,35 @@
 import styled from '@emotion/styled';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, InputAdornment } from '@mui/material';
+import Button from '@mui/material/Button';
 import { GetServerSidePropsContext } from 'next';
-import { FC } from 'react';
-import { SubmitHandler, useForm, useWatch } from 'react-hook-form';
+import { useRouter } from 'next/router';
+import { FC, useEffect, useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 import * as z from 'zod';
-import CheckboxField from '../components/formControl/CheckboxField';
-import FormControl from '../components/formControl/FormControl';
-import InputField from '../components/formControl/InputField';
-import RadioField from '../components/formControl/RadioField';
-import SelectDropdown from '../components/formControl/SelectDropdown';
-import SwitchField from '../components/formControl/SwitchField';
+import {
+  CouponIssuanceSubject,
+  LimitNumberUse,
+  MaximumUse,
+  UseDay,
+  UseDate,
+  UseTime,
+} from '../components/CreateCouponSpecifications';
+import {
+  CheckboxField,
+  FormControl,
+  InputField,
+  RadioField,
+  SelectDropdown,
+  SwitchField,
+} from '../components/formControl';
+
 import Layout from '../components/Layout';
 import HeadSubTitle from '../components/Typography/HeadSubTitle';
 import HeadTitle from '../components/Typography/HeadTitle';
-import Button from '@mui/material/Button';
-import CouponIssuanceSubject from '../components/CreateCouponSpecifications/CouponIssuanceSubject';
-import LimitNumberUse from '../components/CreateCouponSpecifications/LimitNumberUse';
-import MaximumUse from '../components/CreateCouponSpecifications/MaximumUse';
+import { StateType } from '../hooks';
+import useFormData from '../hooks/useFormData';
 
 const fieldWidth = 210;
 
@@ -65,7 +77,7 @@ const oderType = [
 //   yogiPass : boolean
 // };
 
-const schema = z.object({
+export const schema = z.object({
   name: z.string().trim().min(1).max(20),
   issuance: z.object({
     issuanceParent: z.string().trim().min(1),
@@ -91,46 +103,115 @@ const schema = z.object({
   yogiPass: z.boolean(),
   useChanel: z.boolean(),
   useCityRegion: z.boolean(),
-  // useDay: z.array(z.string()),
+  useDay: z.object({
+    isUseDayActive: z.boolean(),
+    mon: z.boolean(),
+    tue: z.boolean(),
+    wed: z.boolean(),
+    thu: z.boolean(),
+    fri: z.boolean(),
+    sat: z.boolean(),
+    sun: z.boolean(),
+  }),
+  // useDate: z.string(),
+  useTime: z.object({
+    startTime: z.date().nullable(),
+    endTime: z.date().nullable(),
+  }),
 });
 
 export type Schema = z.infer<typeof schema>;
 
 const SSRPage: FC = () => {
-  const form = useForm<Schema>({
-    defaultValues: {
-      name: '',
-      issuance: {
-        issuanceParent: '',
-        issuanceChild: '',
-        issuancePercent: 0,
-      },
-      couponBenefits: {
-        typeBenefit: '',
-        benefitValue: 0,
-        maxDiscount: 0,
-      },
-      paymentAcount: 0,
-      limitUse: {
-        isLimitUserActive: false,
-        limitUseValue: 0,
-      },
-      maximumUse: {
-        isMaximumUse: false,
-        maximumUseValue: 0,
-      },
-      subjectsApply: '',
-      oderType: '',
-      yogiPass: false,
-      useChanel: false,
-      useCityRegion: false,
+  const { setData } = useFormData();
+  const router = useRouter();
+  const { copy } = router.query;
+  const store = useSelector((state: StateType) => state.formReducer);
+  const { data } = store;
+  const defaultData = {
+    name: '',
+    issuance: {
+      issuanceParent: '',
+      issuanceChild: '',
+      issuancePercent: 0,
     },
+    couponBenefits: {
+      typeBenefit: '',
+      benefitValue: 0,
+      maxDiscount: 0,
+    },
+    paymentAcount: 0,
+    limitUse: {
+      isLimitUserActive: false,
+      limitUseValue: 0,
+    },
+    maximumUse: {
+      isMaximumUse: false,
+      maximumUseValue: 0,
+    },
+    subjectsApply: '',
+    oderType: '',
+    yogiPass: false,
+    useChanel: false,
+    useCityRegion: false,
+    useDay: {
+      isUseDayActive: false,
+      mon: false,
+      tue: false,
+      wed: false,
+      thu: false,
+      fri: false,
+      sat: false,
+      sun: false,
+    },
+    // useDate: '',
+    useTime: {
+      startTime: undefined,
+      endTime: undefined,
+    },
+  };
+
+  const form = useForm<Schema>({
+    defaultValues: copy ? data : defaultData,
+    shouldUnregister: false,
     resolver: zodResolver(schema),
   });
 
+  useEffect(() => {
+    if (copy) {
+      form.setValue('name', data.name);
+      form.setValue('issuance', data.issuance);
+      form.setValue('limitUse', data.limitUse);
+      form.setValue('maximumUse', data.maximumUse);
+      form.setValue('couponBenefits', data.couponBenefits);
+      form.setValue('oderType', data.oderType);
+      form.setValue('paymentAcount', data.paymentAcount);
+      form.setValue('subjectsApply', data.subjectsApply);
+      form.setValue('useChanel', data.useChanel);
+      form.setValue('useCityRegion', data.useCityRegion);
+      form.setValue('useDay', data.useDay);
+      form.setValue('yogiPass', data.yogiPass);
+    }
+  }, [copy]);
   const handleSubmit: SubmitHandler<Schema> = (values: Schema) => {
     console.log('values', values);
+    setData(values);
+    form.reset();
   };
+  const handleClickCopy = () => {
+    // const copyData = form.getValues();
+    // setData(copyData);
+    form.reset();
+    router.push({
+      pathname: '/create-coupon-specifications',
+      query: { copy: true },
+    });
+  };
+  console.log(form);
+
+  useEffect(() => {
+    return form.reset();
+  }, []);
   return (
     <>
       <Layout title="Create coupon specifications">
@@ -203,24 +284,20 @@ const SSRPage: FC = () => {
               <SwitchField label="" form={form} name="useCityRegion" />
             </FormControl>
             <FormControl id="useDay" label="Use Day">
-              <CheckboxField name="monday" label="Mon" form={form} />
-              <CheckboxField name="tuesday" label="Tue" form={form} />
-              <CheckboxField name="wednesday" label="Wed" form={form} />
-              <CheckboxField name="thursday" label="Thu" form={form} />
-              <CheckboxField name="friday" label="Fri" form={form} />
-              <CheckboxField name="saturday" label="Sat" form={form} />
-              <CheckboxField name="sunday" label="Sun" form={form} />
+              <UseDay form={form} />
             </FormControl>
             <FormControl id="useDate" label="Use Date">
-              <InputField name="useDate" placeholder="8/19" form={form} />
+              <UseDate name="useDate" label="Use Date" form={form} />
             </FormControl>
             <FormControl id="useTime" label="Use Time">
-              <InputField name="useTimeStart" placeholder="10:00" form={form} /> -{' '}
-              <InputField name="useTimeEnd" placeholder="12:00" form={form} />
+              <UseTime name="useTime" label="Use Time" form={form} />
             </FormControl>
           </Box>
 
           <SWrapButton>
+            <Button variant="contained" onClick={handleClickCopy}>
+              Copy
+            </Button>
             <Button variant="contained" type="submit">
               Save
             </Button>
